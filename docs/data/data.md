@@ -7,90 +7,106 @@
 
 ```plantuml
 @startuml
-' Логическая модель данных в варианте UML Class Diagram (альтернатива ER-диаграмме).
-namespace ShoppingCart {
 
- class ShoppingCart
- {
-  id : string
-  createDate : datetime
-  updateDate : datetime
-  customer : Customer
-  price : ShoppingCartPrice
-  cartItems : CartItem[]
- }
+namespace Users{
+    class User
+    {
+        id : string
+        login : string
+        fullName : string
+        role : Role
+        createdAt : datetime
+        updatedAt : datetime
+    }
 
- class ShoppingCartPrice
- {
-  type : CartItemPrice
- }
- class CartItemPrice
- {
-  type : CartItemPriceType
- }
-
- enum CartPriceType
- {
-  total
-  grandTotal
-  offeringDiscount
-  couponsDiscount
- }
-
- class CartItem
- {
-  id : string
-  quantity : int
-  offering : Offering
-  relationship : CartItemRelationShip[]
-  price : CartItemPrice[]
-  status : CartItemStatus
- }
-
-  class Customer
- {
-  id : string
- }
- 
- class Offering
- {
-  id : string
-  isQuantifiable : boolean
-  actionType : OfferingActionType
-  validFor : ValidFor
- }
-  
- class ProductSpecificationRef
- {
-  id : string
- }
- 
- ShoppingCart *-- "1..*" ShoppingCartPrice
- ShoppingCartPrice -- CartPriceType
- ShoppingCart *-- "*" CartItem
- CartItem *-- "*" CartItemPrice
- CartItemPrice -- CartPriceType
- CartItem *-- "1" Offering
- Offering *-- "1" ProductSpecificationRef
- Offering *-- "0..1" ProductConfiguration
- ShoppingCart *-- "1" Customer
+    enum RoleType
+    {
+        speaker
+        viewer
+        reviewer
+        manager
+        support
+    }
+    User -- RoleType
 }
 
-namespace Ordering {
- ProductOrder *-- OrderItem
- OrderItem *-- Product
- Product *-- ProductSpecificationRef
- ProductOrder *-- Party
+namespace Conference {
+
+
+    class Conference
+    {
+        id : string
+        name : string
+        dateStart : datetime
+        dateFinish : datetime
+    }
+
+    class ConferenceMember
+    {
+        confId : string
+        userId : string
+    }
+
+
+    class ConferenceSchedule
+    {
+        confId : string
+        time : time
+        reportId : string
+    }
+
+
+    class ConferenceFeedback
+    {
+        id : string
+        confId : string
+        userId : string
+        questionId : string
+        score : integer
+    }
+
+
+    Conference *-- "1" ConferenceSchedule
+    ConferenceMember "*"--"*" Conference
+    Conference *-- "*" ConferenceFeedback
+
 }
 
-namespace ProductCatalog {
- ShoppingCart.ProductSpecificationRef ..> ProductSpecification : ref
- Ordering.ProductSpecificationRef ..> ProductSpecification : ref
+namespace Reports {
+    class Report
+    {
+        id : string
+        userId : string
+        name : string
+        content : string
+        conferenceId : string
+    }
+
+    class ReportReview
+    {
+        reportId : string
+        reviewerId : string
+        status : ReportStatus
+    }
+
+    enum ReportStatus
+    {
+        pending
+        reviewing
+        reopened
+        accepted
+        rejected
+    }
+
+    ReportReview -- ReportStatus
+    Report *--"1" ReportReview
 }
 
-namespace CX {
- ShoppingCart.Customer ..> Customer : ref
- Ordering.Party ..> Customer : ref
-}
+Conference.ConferenceMember "*"--"*" Users.User
+Conference.ConferenceFeedback "*"--"*" Users.User
+Reports.Report "*"--"*" Users.User
+Reports.ReportReview "*"--"*" Users.User
+Reports.Report "*"--* Conference.ConferenceSchedule
+
 @enduml
 ```
